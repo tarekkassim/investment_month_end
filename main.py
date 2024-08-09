@@ -1,6 +1,6 @@
 import libraray
 
-month = 'June 2024'
+month = 'Jul 2024'
 
 libraray.allTransactions(month)
 libraray.allBalances(month)

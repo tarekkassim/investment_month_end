@@ -7,7 +7,7 @@ def importPreMonth(monthYear):
 
     def get_previous_month_abbr(date_str):
         # Parse the input string to a datetime object
-        current_date = datetime.strptime(date_str, '%B %Y')
+        current_date = datetime.strptime(date_str, '%b %Y')
 
         # Calculate the first day of the previous month
         previous_month = current_date.replace(day=1) - timedelta(days=1)
@@ -24,13 +24,13 @@ def importPreMonth(monthYear):
     preMthPath = r'C:\Users\ttarek\OneDrive - Tarion\Projects\Python\Investment Working - ' + previousMonth + '.xlsx'
     curMthPath = r'C:\Users\ttarek\OneDrive - Tarion\Projects\Python\Investment Working - ' + monthYear + '.xlsx'
 
-    df = pd.read_excel(preMthPath, sheet_name='Balances - Current Month')
+    df = pd.read_excel(preMthPath, sheet_name='Balances - Cur Month')
 
     # Export df to the current month's workbook as a new sheet
     with pd.ExcelWriter(curMthPath, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-        df.to_excel(writer, sheet_name='Balances - Previous Month', index=False)
+        df.to_excel(writer, sheet_name='Balances - Prev Month', index=False)
 
-    df = pd.read_excel(preMthPath, sheet_name='Balance Summary - Current Month')
+    df = pd.read_excel(preMthPath, sheet_name='Balance Summary - Cur Month')
 
     # Export df to the current month's workbook as a new sheet
     with pd.ExcelWriter(curMthPath, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:

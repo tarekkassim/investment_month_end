@@ -7,7 +7,7 @@ def allTransactions(monthYear):
 
     def get_next_month_abbr(date_str):
         # Parse the input string to a datetime object
-        current_date = datetime.strptime(date_str, '%B %Y')
+        current_date = datetime.strptime(date_str, '%b %Y')
 
         # Calculate the first day of the next month
         next_month = current_date.replace(day=28) + timedelta(days=4)  # this will definitely be in the next month
@@ -66,11 +66,11 @@ def allTransactions(monthYear):
     # Drop rows where 'Transaction Type' is NaN
     # new_df = new_df.dropna(subset=['Transaction Type'])
 
-    #Drop Transactions rows which are not unsettled
+    # Drop Transactions rows which are not unsettled
     new_df = new_df[
         ~((new_df['Date'].str.contains(nextMonth)) & (new_df['Details'].str.contains('PAID INTEREST|TREASURY BILLS')))]
 
-    #convert data types
+    # convert data types
     new_df['Account Number'] = new_df['Account Number'].astype(int)
     new_df['Units'] = new_df['Units'].astype(str).str.replace(',', '')  # Remove commas from the column
     new_df['Units'] = pd.to_numeric(new_df['Units'], errors='coerce')
@@ -83,19 +83,22 @@ def allTransactions(monthYear):
     new_df['Details'] = new_df['Details'].astype(str)
     new_df['Details 2'] = new_df['Details 2'].astype(str)
 
-    #Combine Transaction Type columns and drop second column
+    # Combine Transaction Type columns and drop second column
     new_df['Transaction Type'] = new_df['Transaction Type'] + new_df['Transaction Type 2']
     new_df = new_df.drop(columns=['Transaction Type 2'])
     new_df['Transaction Type'] = new_df['Transaction Type'].str.replace('nan','')
 
-    #Combine Details columns and drop second column
+    # Combine Details columns and drop second column
     new_df['Details'] = new_df['Details'] + new_df['Details 2']
     new_df = new_df.drop(columns=['Details 2'])
     new_df['Details'] = new_df['Details'].str.replace('nan','')
 
-    #Combine Transaction Cash Value columns and drop second column
+    # Combine Transaction Cash Value columns and drop second column
     new_df['Transaction Cash Value'] = new_df['Transaction Cash Value'].fillna(new_df['Transaction Cash Value 2'])
     new_df = new_df.drop(columns=['Transaction Cash Value 2'])
+
+    # Replace Transaction Type for interest received
+    new_df.loc[new_df['Details'].str.contains('CASH INTEREST ON DAILY BALANCE', na=False), 'Transaction Type'] = 'AIN'
 
     # Display the new DataFrame
     # print(new_df)
@@ -105,3 +108,4 @@ def allTransactions(monthYear):
     # print(new_df.dtypes)
 
     new_df.to_excel(outputPath, index=False, sheet_name='All Transactions')
+

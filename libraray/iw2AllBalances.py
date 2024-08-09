@@ -66,4 +66,4 @@ def allBalances(monthYear):
 
     # Export new_df to the same workbook as a new sheet
     with pd.ExcelWriter(outputPath, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-        new_df.to_excel(writer, sheet_name='Balances - Current Month', index=False)
+        new_df.to_excel(writer, sheet_name='Balances - Cur Month', index=False)
