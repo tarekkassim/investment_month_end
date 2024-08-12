@@ -30,8 +30,8 @@ def importPreMonth(monthYear):
     with pd.ExcelWriter(curMthPath, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
         df.to_excel(writer, sheet_name='Balances - Prev Month', index=False)
 
-    df = pd.read_excel(preMthPath, sheet_name='Balance Summary - Cur Month')
+    df = pd.read_excel(preMthPath, sheet_name='Bond Sum - Cur Month')
 
     # Export df to the current month's workbook as a new sheet
     with pd.ExcelWriter(curMthPath, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-        df.to_excel(writer, sheet_name='Balance Summary - Prev Month', index=False)
+        df.to_excel(writer, sheet_name='Bond Sum - Prev Month', index=False)

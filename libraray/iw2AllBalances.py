@@ -61,6 +61,9 @@ def allBalances(monthYear):
     new_df['Accrued Interest'] = new_df['Accrued Interest'].astype(str).str.replace(',', '') # Remove commas from the column
     new_df['Accrued Interest'] = pd.to_numeric(new_df['Accrued Interest'], errors='coerce')
 
+    # Replace treasury bill market value with book value
+    new_df.loc[new_df['Type'] == 'CASH EQUIVALENTS', 'Market Value'] = new_df['Book Value']
+
     # print(new_df.to_string())
     # print(new_df.dtypes)
 

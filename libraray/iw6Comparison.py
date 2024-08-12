@@ -8,8 +8,8 @@ def comparison(monthYear):
     curMthPath = r'C:\Users\ttarek\OneDrive - Tarion\Projects\Python\Investment Working - ' + monthYear + '.xlsx'
 
     # Create tables for merge
-    current_table = pd.read_excel(curMthPath, sheet_name='Balance Summary - Cur Month')
-    previous_table = pd.read_excel(curMthPath, sheet_name='Balance Summary - Prev Month')
+    current_table = pd.read_excel(curMthPath, sheet_name='Bond Sum - Cur Month')
+    previous_table = pd.read_excel(curMthPath, sheet_name='Bond Sum - Prev Month')
     transactions = pd.read_excel(curMthPath, sheet_name='Transaction Summary')
 
     # Balance Table
@@ -58,7 +58,7 @@ def comparison(monthYear):
     compare_balance = compare_balance.fillna(0)
 
     # Identify columns to sum (excluding 'Account Number' and 'Closing Balance')
-    columns_to_sum = [col for col in compare_balance.columns if col not in ['Account Number', 'Closing Balance']]
+    columns_to_sum = [col for col in compare_balance.columns if col not in ['Account Number', 'Closing Balance', 'AIN']]
 
     # Create a new column 'Total' with the sum of the identified columns
     compare_balance['Expected Closing Balance'] = compare_balance[columns_to_sum].sum(axis=1)
@@ -71,7 +71,7 @@ def comparison(monthYear):
 
     # Export new_df to the same workbook as a new sheet
     with pd.ExcelWriter(curMthPath, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-        compare_balance.to_excel(writer, sheet_name='Balance Comparison', index=False)
+        compare_balance.to_excel(writer, sheet_name='Bond Comparison', index=False)
 
     # Interest Table
 
