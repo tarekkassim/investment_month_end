@@ -24,9 +24,43 @@ def comparison(monthYear):
     preMthPath = r'C:\Users\ttarek\OneDrive - Tarion\Projects\Python\Investment Working - ' + previousMonth + '.xlsx'
 
     # Create tables for merge
-    current_table = pd.read_excel(curMthPath, sheet_name='Bond Summary')
     previous_table = pd.read_excel(preMthPath, sheet_name='Bond Summary')
-    transactions = pd.read_excel(curMthPath, sheet_name='Transaction Summary')
+
+    # Transactions summary Table
+    transactions_df = pd.read_excel(curMthPath, sheet_name='Transactions')
+
+    transactions = transactions_df.pivot_table(
+        index='Account Number',
+        columns='Transaction Type',
+        values='Transaction Cash Value',
+        aggfunc='sum',
+        fill_value=0
+    )
+
+    # Multiply all values in the pivot table by -1
+    transactions = transactions * -1
+
+    transactions = transactions.reset_index()
+
+    # Balance summary table
+
+    # Read the data from the current month Excel file
+    balance_df = pd.read_excel(curMthPath, sheet_name='Balances')
+
+    # DF for bonds
+    bond_df = balance_df[(balance_df['Type'] == 'CASH EQUIVALENTS') | (balance_df['Type'] == 'FIXED INCOME')]
+
+    # Pivot for bonds
+    current_table = bond_df.pivot_table(
+        index='Account Number',
+        values=['Market Value', 'Accrued Interest'],
+        aggfunc='sum',
+        fill_value=0
+    )
+
+    # Rename the column 'Market Value' to something else, e.g., 'Total Market Value'
+    current_table = current_table.rename(
+        columns={'Market Value': 'Closing Balance', 'Accrued Interest': 'Closing Interest'})
 
     # Balance Table
 
