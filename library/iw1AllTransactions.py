@@ -107,5 +107,5 @@ def allTransactions(monthYear):
     # print("\nColumn Data Types:")
     # print(new_df.dtypes)
 
-    new_df.to_excel(outputPath, index=False, sheet_name='All Transactions')
+    new_df.to_excel(outputPath, index=False, sheet_name='Transactions')
 

@@ -1,10 +1,10 @@
-import libraray
+import library as lb
 
 month = 'Jul 2024'
 
-libraray.allTransactions(month)
-libraray.allBalances(month)
-libraray.transactionPvt(month)
-libraray.balancePvt(month)
-libraray.importPreMonth(month)
-libraray.comparison(month)
+lb.allTransactions(month)
+lb.allBalances(month)
+lb.transactionPvt(month)
+lb.balancePvt(month)
+lb.bond_details(month)
+lb.comparison(month)

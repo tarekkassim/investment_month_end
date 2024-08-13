@@ -5,11 +5,27 @@ from datetime import datetime, timedelta
 
 def comparison(monthYear):
 
+    def get_previous_month_abbr(date_str):
+        # Parse the input string to a datetime object
+        current_date = datetime.strptime(date_str, '%b %Y')
+
+        # Calculate the first day of the previous month
+        previous_month = current_date.replace(day=1) - timedelta(days=1)
+        previous_month = previous_month.replace(day=1)
+
+        # Format the previous month in the desired format and extract the first three letters of the month
+        previous_month_str = previous_month.strftime('%b %Y')
+
+        return previous_month_str
+
+    previousMonth = get_previous_month_abbr(monthYear)
+
     curMthPath = r'C:\Users\ttarek\OneDrive - Tarion\Projects\Python\Investment Working - ' + monthYear + '.xlsx'
+    preMthPath = r'C:\Users\ttarek\OneDrive - Tarion\Projects\Python\Investment Working - ' + previousMonth + '.xlsx'
 
     # Create tables for merge
-    current_table = pd.read_excel(curMthPath, sheet_name='Bond Sum - Cur Month')
-    previous_table = pd.read_excel(curMthPath, sheet_name='Bond Sum - Prev Month')
+    current_table = pd.read_excel(curMthPath, sheet_name='Bond Summary')
+    previous_table = pd.read_excel(preMthPath, sheet_name='Bond Summary')
     transactions = pd.read_excel(curMthPath, sheet_name='Transaction Summary')
 
     # Balance Table
