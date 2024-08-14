@@ -5,7 +5,6 @@ month = 'Jul 2024'
 
 dl.allTransactions(month)
 dl.allBalances(month)
-dl.balancePvt(month)
 dl.bond_details(month)
 dl.comparison(month)
 fl.number_format(month)

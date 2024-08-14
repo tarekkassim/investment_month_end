@@ -1,6 +1,5 @@
-from .iw1AllTransactions import allTransactions
-from .iw2AllBalances import allBalances
-from .iw4CreatePvtForBalances import balancePvt
-from .iw4_1BondDetails import bond_details
-from .iw6Comparison import comparison
+from .all_transactions import allTransactions
+from .all_balances import allBalances
+from .bond_details import bond_details
+from .comparison import comparison
 
