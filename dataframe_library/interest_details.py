@@ -3,7 +3,7 @@ from openpyxl import load_workbook
 from datetime import datetime, timedelta
 
 
-def bond_details(monthYear):
+def interest_details(monthYear):
 
     def get_previous_month_abbr(date_str):
         # Parse the input string to a datetime object
@@ -50,8 +50,8 @@ def bond_details(monthYear):
         new_current_transactions = current_transactions[current_transactions['Account Number'] == account].copy()
 
         # Change column names
-        new_current_balance.rename(columns={'Market Value': 'Closing Balance'}, inplace=True)
-        new_previous_balance.rename(columns={'Market Value': 'Opening Balance'}, inplace=True)
+        new_current_balance.rename(columns={'Accrued Interest': 'Closing Interest Balance'}, inplace=True)
+        new_previous_balance.rename(columns={'Accrued Interest': 'Opening Interest Balance'}, inplace=True)
 
         # Pivot of transactions
         new_current_transactions = (
@@ -72,17 +72,25 @@ def bond_details(monthYear):
         # multiply pivot columns by -1
         transactions_accounts.loc[:, transactions_accounts.columns != 'CUSIP'] *= -1
 
-        # Concatenate the 'Account Number' columns from both DataFrames
-        details = pd.concat([new_current_balance['CUSIP'], transactions_accounts['CUSIP']])
+        transactions_accounts = transactions_accounts[['CUSIP', 'INT']]
+
+        # Concatenate the 'Account Number' columns from all DataFrames
+        details = pd.concat([
+            new_previous_balance['CUSIP'], new_current_balance['CUSIP'], transactions_accounts['CUSIP']
+        ])
 
         # Get unique values
         details = details.drop_duplicates().reset_index(drop=True)
 
-        # # Create a new DataFrame with the unique 'Account Number'
+        # Create a new DataFrame with the unique 'Account Number'
         details = pd.DataFrame({'CUSIP': details})
 
+        # Segregate bonds and bills
+        details['Type'] = details['CUSIP'].apply(lambda x: 'Bills' if 'CA1350Z7' in x else 'Bonds')
+
         # Lookup values from tables
-        details = details.merge(new_previous_balance[['CUSIP','Opening Balance']],
+
+        details = details.merge(new_previous_balance[['CUSIP', 'Opening Interest Balance']],
                                 left_on='CUSIP',
                                 right_on='CUSIP',
                                 how='left'
@@ -94,10 +102,7 @@ def bond_details(monthYear):
                                 how='left',
                                 )
 
-        if 'INT' in details.columns:
-            details = details.drop(columns='INT')
-
-        details = details.merge(new_current_balance[['CUSIP', 'Closing Balance']],
+        details = details.merge(new_current_balance[['CUSIP', 'Closing Interest Balance']],
                                 left_on='CUSIP',
                                 right_on='CUSIP',
                                 how='left'
@@ -107,24 +112,25 @@ def bond_details(monthYear):
 
         # Identify columns to sum (excluding 'Account Number' and 'Closing Balance')
         columns_to_sum = [col for col in details.columns if
-                          col not in ['CUSIP', 'Closing Balance']]
+                          col not in ['CUSIP', 'Type', 'Closing Interest Balance']]
 
         # Create a new column 'Total' with the sum of the identified columns
         details['Expected Closing Balance'] = details[columns_to_sum].sum(axis=1)
 
         # Create a new column 'FV Change' with the difference between actual and expected closing balance
-        details['FV Change'] = details['Closing Balance'] - details['Expected Closing Balance']
+        details['Interest Income'] = details['Closing Interest Balance'] - details['Expected Closing Balance']
 
         # Drop Expected Closing Balance column
         details = details.drop(columns='Expected Closing Balance')
 
-        # Check Column
-        columns_to_sum_check = [col for col in details.columns if
-                          col not in ['CUSIP', 'Closing Balance', 'FV Change']]
-        details['Check'] = details['FV Change'] / ((details[columns_to_sum_check].sum(axis=1) + details['Closing Balance'])/2)
+        # Create new interest columns
+        details['Interest Income - Bonds'] = details.apply(
+            lambda row: row['Interest Income'] if row['Type'] == 'Bonds' else 0, axis=1)
+        details['Interest Income - Bills'] = details.apply(
+            lambda row: row['Interest Income'] if row['Type'] == 'Bills' else 0, axis=1)
 
         # Export new_df to the same workbook as a new sheet
-        sheet_name = f'Bond Details {accounts_name}'
+        sheet_name = f'Int Details {accounts_name}'
         with pd.ExcelWriter(curMthPath, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
             details.to_excel(writer, sheet_name=sheet_name, index=False)
 

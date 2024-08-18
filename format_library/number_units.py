@@ -1,17 +1,28 @@
 import openpyxl
-from openpyxl.styles import Alignment, Font, Border, Side
+from openpyxl.styles import Alignment, Font, Border, Side, NamedStyle, numbers
 
 
 def number_format(month_year):
 
-    # Specify the column names you want to format
-    columns_to_format = ['Units', 'Transaction Cash Value', 'Book Value', 'Market Value', 'Accrued Interest',
-                         'Closing Balance', 'Opening Balance', 'FV Change', 'DVP', 'RVP', 'MAT', 'AIN',
-                         'Opening Interest', 'Closing Interest', 'Interest Income', 'INT']
-
     # Load the workbook
     file_path = r'C:\Users\ttarek\OneDrive - Tarion\Projects\Python\Investment Working - ' + month_year + '.xlsx'
     workbook = openpyxl.load_workbook(file_path)
+
+    # main code
+
+    # Create a named style for the number format
+    number_format_style = NamedStyle(name="number_format_style")
+    number_format_style.number_format = '#,##0.00'
+
+    # Iterate through all the sheets in the workbook
+    for sheet in workbook.worksheets:
+        for row in sheet.iter_rows():
+            for cell in row:
+                if isinstance(cell.value, float):
+                    cell.style = number_format_style
+
+    # for exceptions
+    columns_to_format = ['Units']
 
     # Iterate through all sheets in the workbook
     for sheet in workbook.worksheets:

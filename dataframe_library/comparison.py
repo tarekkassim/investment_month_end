@@ -41,6 +41,7 @@ def comparison(monthYear):
 
     transactions = transactions.reset_index()
 
+    # Transactions for equity
     transactions_of_equity = transactions_equity.pivot_table(
         index='Account Number',
         columns='Transaction Type',
@@ -53,6 +54,17 @@ def comparison(monthYear):
     transactions_of_equity = transactions_of_equity * -1
 
     transactions_of_equity = transactions_of_equity.reset_index()
+
+    # All transactions pivot
+    transactions_all = transactions_df.pivot_table(
+        index='Account Number',
+        columns='Transaction Type',
+        values='Transaction Cash Value',
+        aggfunc='sum',
+        fill_value=0
+    )
+
+    transactions_all = transactions_all.reset_index()
 
     # Balance summary tables-----------------------------
 
@@ -278,3 +290,34 @@ def comparison(monthYear):
     # Export new_df to the same workbook as a new sheet
     with pd.ExcelWriter(curMthPath, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
         equity_pivot_table.to_excel(writer, sheet_name='Equity Comparison', index=False)
+
+    # Cash Reconciliation ----------------------------
+
+    cash_balance_df = pd.read_excel(curMthPath, sheet_name='Cash Balances')
+    pre_cash_balance_df = pd.read_excel(preMthPath, sheet_name='Cash Balances')
+    pre_cash_balance_df = pre_cash_balance_df.rename(columns={'Closing Balance': 'Opening Balance'})
+
+    cash_recon = pre_cash_balance_df.merge(
+        transactions_all,
+        left_on='Account Number',
+        right_on='Account Number',
+        how='left'
+    )
+
+    cash_recon = cash_recon.merge(
+        cash_balance_df,
+        left_on='Account Number',
+        right_on='Account Number',
+        how='left'
+    )
+
+    columns_to_sum_cash = [col for col in cash_recon.columns if col not in
+                             ['Account Number', 'Closing Balance']
+                             ]
+
+    cash_recon['Recon Check'] = (cash_recon['Closing Balance'] -
+                                 cash_recon[columns_to_sum_cash].sum(axis=1))
+
+    # Export new_df to the same workbook as a new sheet
+    with pd.ExcelWriter(curMthPath, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+        cash_recon.to_excel(writer, sheet_name='Cash Recon', index=False)

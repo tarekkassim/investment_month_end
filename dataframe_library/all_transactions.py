@@ -41,8 +41,7 @@ def allTransactions(monthYear):
                       'Details', 'Transaction Type 2', 'Details 2', 'Transaction Cash Value 2']
 
     # Drop currency hedge & ACM rows
-    hedgerows = ['Account Number:    000147000CAD',
-                 'Account Number:    000147000EUR',
+    hedgerows = ['Account Number:    000147000EUR',
                  'Account Number:    000147000GBP',
                  'Account Number:    000147000JPY',
                  'Account Number:    000147000USD',
@@ -56,6 +55,9 @@ def allTransactions(monthYear):
 
     for x in hedgerows:
         new_df = new_df[~new_df['Account Number'].str.contains(x)]
+
+    # Remove CAD from Account Number
+    new_df['Account Number'] = new_df['Account Number'].str.replace('CAD', '', regex=False)
 
     # Keep only the last 9 characters of the 'Account Number' column
     new_df['Account Number'] = new_df['Account Number'].astype(str).str.replace('Account Number:', '').str.strip()
@@ -98,7 +100,10 @@ def allTransactions(monthYear):
     new_df = new_df.drop(columns=['Transaction Cash Value 2'])
 
     # Replace Transaction Type for interest received
-    new_df.loc[new_df['Details'].str.contains('CASH INTEREST ON DAILY BALANCE', na=False), 'Transaction Type'] = 'AIN'
+    new_df.loc[
+        new_df['Details'].str.contains('CASH INTEREST ON DAILY BALANCE|Other Income & Interest', na=False),
+        'Transaction Type'
+    ] = 'AIN'
 
     # Display the new DataFrame
     # print(new_df)
