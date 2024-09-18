@@ -205,6 +205,26 @@ def comparison(monthYear):
     # Drop Expected Closing Interest column
     compare_int = compare_int.drop(columns='Expected Closing Interest')
 
+    # Split interest Income
+    interest_table_bg = pd.read_excel(curMthPath, sheet_name='Int Details BG')
+    interest_table_phn = pd.read_excel(curMthPath, sheet_name='Int Details PHN')
+
+    bg_bond_income = interest_table_bg['Interest Income - Bonds'].sum()
+    bg_bill_income = interest_table_bg['Interest Income - Bills'].sum()
+    phn_bond_income = interest_table_phn['Interest Income - Bonds'].sum()
+    phn_bill_income = interest_table_phn['Interest Income - Bills'].sum()
+
+    compare_int['Interest Income - Bonds'] = None
+    compare_int['Interest Income - Bills'] = None
+
+    compare_int.loc[compare_int['Account Number'] == 147122001, 'Interest Income - Bonds'] = bg_bond_income
+    compare_int.loc[compare_int['Account Number'] == 147122001, 'Interest Income - Bills'] = bg_bill_income
+    compare_int.loc[compare_int['Account Number'] == 147122005, 'Interest Income - Bonds'] = phn_bond_income
+    compare_int.loc[compare_int['Account Number'] == 147122005, 'Interest Income - Bills'] = phn_bill_income
+
+    compare_int['Check'] = (compare_int['Interest Income'] - compare_int['Interest Income - Bonds'] -
+                            compare_int['Interest Income - Bills'])
+
     # Export new_df to the same workbook as a new sheet
     with pd.ExcelWriter(curMthPath, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
         compare_int.to_excel(writer, sheet_name='Interest Comparison', index=False)
@@ -293,9 +313,14 @@ def comparison(monthYear):
 
     # Cash Reconciliation ----------------------------
 
-    cash_balance_df = pd.read_excel(curMthPath, sheet_name='Cash Balances')
-    pre_cash_balance_df = pd.read_excel(preMthPath, sheet_name='Cash Balances')
-    pre_cash_balance_df = pre_cash_balance_df.rename(columns={'Closing Balance': 'Opening Balance'})
+    cash_balance_df = pd.read_excel(curMthPath, sheet_name='Balances')
+    cash_balance_df = cash_balance_df[['Account Number', 'Cash Balance']]
+    cash_balance_df = cash_balance_df.dropna(subset='Cash Balance')
+    cash_balance_df = cash_balance_df.rename(columns={'Cash Balance': 'Closing Balance'})
+    pre_cash_balance_df = pd.read_excel(preMthPath, sheet_name='Balances')
+    pre_cash_balance_df = pre_cash_balance_df[['Account Number', 'Cash Balance']]
+    pre_cash_balance_df = pre_cash_balance_df.dropna(subset='Cash Balance')
+    pre_cash_balance_df = pre_cash_balance_df.rename(columns={'Cash Balance': 'Opening Balance'})
 
     cash_recon = pre_cash_balance_df.merge(
         transactions_all,

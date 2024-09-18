@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 
 
 def allTransactions(monthYear):
-
     def get_next_month_abbr(date_str):
         # Parse the input string to a datetime object
         current_date = datetime.strptime(date_str, '%b %Y')
@@ -18,7 +17,6 @@ def allTransactions(monthYear):
 
         return next_month_str
 
-
     nextMonth = get_next_month_abbr(monthYear)
 
     # Set display options to print all columns
@@ -26,7 +24,8 @@ def allTransactions(monthYear):
     pd.set_option('display.width', None)
 
     # Specify the file path
-    filePath = r'C:\Users\ttarek\OneDrive - Tarion\Projects\Python\Source Reports\315 - Cash Transaction Report - ' + monthYear + ' (Original).csv'
+    filePath = (r'C:\Users\ttarek\OneDrive - Tarion\Projects\Python\Source Reports\315 - Cash Transaction Report - ' +
+                monthYear + ' (Original).csv')
     outputPath = r'C:\Users\ttarek\OneDrive - Tarion\Projects\Python\Investment Working - ' + monthYear + '.xlsx'
 
     # Read the Excel file without headers
@@ -37,7 +36,8 @@ def allTransactions(monthYear):
 
     # Create a new DataFrame with the extracted data
     new_df = pd.DataFrame(extracted_columns)
-    new_df.columns = ['Account Number', 'Date', 'Transaction Type', 'Units', 'Issuer', 'Transaction Cash Value', 'CUSIP',
+    new_df.columns = ['Account Number', 'Date', 'Transaction Type', 'Units', 'Issuer', 'Transaction Cash Value',
+                      'CUSIP',
                       'Details', 'Transaction Type 2', 'Details 2', 'Transaction Cash Value 2']
 
     # Drop currency hedge & ACM rows
@@ -76,9 +76,9 @@ def allTransactions(monthYear):
     new_df['Account Number'] = new_df['Account Number'].astype(int)
     new_df['Units'] = new_df['Units'].astype(str).str.replace(',', '')  # Remove commas from the column
     new_df['Units'] = pd.to_numeric(new_df['Units'], errors='coerce')
-    new_df['Transaction Cash Value'] = new_df['Transaction Cash Value'].astype(str).str.replace(',','')  # Remove commas from the column
+    new_df['Transaction Cash Value'] = new_df['Transaction Cash Value'].astype(str).str.replace(',', '')
     new_df['Transaction Cash Value'] = pd.to_numeric(new_df['Transaction Cash Value'], errors='coerce')
-    new_df['Transaction Cash Value 2'] = new_df['Transaction Cash Value 2'].astype(str).str.replace(',','')  # Remove commas from the column
+    new_df['Transaction Cash Value 2'] = new_df['Transaction Cash Value 2'].astype(str).str.replace(',', '')
     new_df['Transaction Cash Value 2'] = pd.to_numeric(new_df['Transaction Cash Value 2'], errors='coerce')
     new_df['Transaction Type'] = new_df['Transaction Type'].astype(str)
     new_df['Transaction Type 2'] = new_df['Transaction Type 2'].astype(str)
@@ -88,12 +88,12 @@ def allTransactions(monthYear):
     # Combine Transaction Type columns and drop second column
     new_df['Transaction Type'] = new_df['Transaction Type'] + new_df['Transaction Type 2']
     new_df = new_df.drop(columns=['Transaction Type 2'])
-    new_df['Transaction Type'] = new_df['Transaction Type'].str.replace('nan','')
+    new_df['Transaction Type'] = new_df['Transaction Type'].str.replace('nan', '')
 
     # Combine Details columns and drop second column
     new_df['Details'] = new_df['Details'] + new_df['Details 2']
     new_df = new_df.drop(columns=['Details 2'])
-    new_df['Details'] = new_df['Details'].str.replace('nan','')
+    new_df['Details'] = new_df['Details'].str.replace('nan', '')
 
     # Combine Transaction Cash Value columns and drop second column
     new_df['Transaction Cash Value'] = new_df['Transaction Cash Value'].fillna(new_df['Transaction Cash Value 2'])
@@ -105,12 +105,4 @@ def allTransactions(monthYear):
         'Transaction Type'
     ] = 'AIN'
 
-    # Display the new DataFrame
-    # print(new_df)
-
-    # Print the data type of each column
-    # print("\nColumn Data Types:")
-    # print(new_df.dtypes)
-
     new_df.to_excel(outputPath, index=False, sheet_name='Transactions')
-
